@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barangay Management Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="container header-content">
+            <div class="logo-area" onclick="switchView('resident')">
+                <div class="logo-icon">BS</div>
+                <div>
+                    <p class="logo-sub">Republic of the Philippines</p>
+                    <h1>BARANGAY SAN JOSE</h1>
+                </div>
+            </div>
+            <div class="nav-links">
+                <button onclick="switchView('resident')" id="navResBtn" class="nav-btn active">Resident Portal</button>
+                <button onclick="switchView('admin')" id="navAdminBtn" class="nav-btn">Admin Dashboard</button>
+            </div>
+            <div class="badge-pill"><div class="dot"></div><span id="roleLabel">Resident View</span></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- RESIDENT VIEW -->
+        <div id="residentView">
+            <div class="hero-banner">
+                <h2>Barangay San Jose E-Services</h2>
+                <p>Request official barangay clearances, certificates of indigency, and residency quickly online.</p>
+                <button class="btn" onclick="scrollToForm()">Request a Document</button>
+            </div>
+
+            <div class="grid-2">
+                <div class="card" id="formSection">
+                    <div class="card-header">Document Request Form</div>
+                    <form onsubmit="submitDoc(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Document Type *</label>
+                                <select id="docType" required>
+                                    <option value="" disabled selected>Select...</option>
+                                    <option value="Barangay Clearance">Barangay Clearance</option>
+                                    <option value="Certificate of Indigency">Certificate of Indigency</option>
+                                    <option value="Certificate of Residency">Certificate of Residency</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Full Name *</label><input type="text" id="reqName" required></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Contact *</label><input type="text" id="reqContact" required></div>
+                            <div class="form-group"><label>Address / Purok *</label><input type="text" id="reqAddress" required></div>
+                        </div>
+                        <div class="form-group"><label>Purpose *</label><textarea id="reqPurpose" rows="2" required></textarea></div>
+                        <button type="submit" class="btn btn-green w-100">Submit Request</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-header text-red">Hotlines</div>
+                    <div class="hotline-box"><strong>Hall Desk:</strong> (02) 8123-4567</div>
+                    <div class="hotline-box"><strong>Health Center:</strong> 0917-888-9999</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Track Requests</div>
+                <table>
+                    <thead><tr><th>Ref</th><th>Applicant</th><th>Document</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody id="resTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ADMIN VIEW -->
+        <div id="adminView" class="hidden">
+            <div class="stats-grid">
+                <div class="stat-card"><div><p>Population</p><h3 id="statPop">0</h3></div></div>
+                <div class="stat-card"><div><p>Households</p><h3 id="statHouseholds">0</h3></div></div>
+                <div class="stat-card"><div><p>Seniors</p><h3 id="statSeniors">0</h3></div></div>
+                <div class="stat-card"><div><p>Pending</p><h3 id="statRequests" class="text-orange">0</h3></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Census Management</span>
+                    <button class="btn btn-green sm-btn" onclick="openModal()">+ Add Resident</button>
+                </div>
+                <div class="filter-row">
+                    <input type="text" id="searchInput" oninput="filterCensus()" placeholder="Search name...">
+                    <select id="purokFilter" onchange="filterCensus()">
+                        <option value="ALL">All Puroks</option>
+                        <option value="Purok 1">Purok 1</option><option value="Purok 2">Purok 2</option><option value="Purok 3">Purok 3</option>
+                    </select>
+                </div>
+                <table>
+                    <thead><tr><th>Name</th><th>Age/Gen</th><th>Purok</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody id="censusTable"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Manage Requests</div>
+                <table>
+                    <thead><tr><th>Ref</th><th>Applicant</th><th>Type</th><th>Control Status</th></tr></thead>
+                    <tbody id="adminReqTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Resident</h3><button onclick="closeModal()" class="close-btn">&times;</button></div>
+            <div class="modal-body">
+                <form onsubmit="saveCensus(event)">
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="cName" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Age *</label><input type="number" id="cAge" required></div>
+                        <div class="form-group"><label>Gender</label><select id="cGen"><option>Male</option><option>Female</option></select></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Purok</label><select id="cPurok"><option>Purok 1</option><option>Purok 2</option><option>Purok 3</option></select></div>
+                        <div class="form-group"><label>Civil Status</label><select id="cCivil"><option>Single</option><option>Married</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Address</label><input type="text" id="cAddress" required></div>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" id="cHead"> Household Head</label>
+                        <label><input type="checkbox" id="cVoter"> Registered Voter</label>
+                    </div>
+                    <button type="submit" class="btn btn-green w-100">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRINT MODAL -->
+    <div id="printModal" class="modal">
+        <div class="modal-content print-modal-box">
+            <div class="modal-header no-print"><h3>Certificate Preview</h3><button onclick="closePrint()" class="close-btn">&times;</button></div>
+            <div class="cert-container">
+                <div id="printCert" class="cert-box">
+                    <h2 class="text-center">BARANGAY SAN JOSE</h2>
+                    <h3 id="certTitle" class="text-center cert-title">CLEARANCE</h3>
+                    <p class="cert-body">This is to certify that <strong id="certName" class="underline"></strong> is a permanent resident of Barangay San Jose, issued for <strong id="certPurpose"></strong>.</p>
+                    <div class="cert-sign"><strong>HON. ROBERTO V. SANTOS</strong><br><small>Punong Barangay</small></div>
+                </div>
+                <button class="btn btn-green no-print mt-3 w-100" onclick="window.print()">Print Document</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
